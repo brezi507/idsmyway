@@ -1,0 +1,50 @@
+#### first python api
+
+import sys
+import os
+import time
+import logging
+from flask import Flask
+from flask_restful import Resource, Api
+from flask_restful import reqparse
+from flask.ext.mysql import MySQL
+
+app = Flask(__name__)
+api = Api(app)
+
+mysql = MySQL()
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'parola123'
+app.config['MYSQL_DATABASE_DB'] = 'ids_database'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
+mysql.init_app(app)
+conn = mysql.connect()
+cursor = conn.cursor()
+cursor.callproc()
+class CreateUser(Resource):
+      def post(self):
+          try:
+             #parse the argument
+             parser = reqparse.RequestParser()    #create a parser
+             parser.add_argument('email', type=str, help='Email address to create user')
+             parser.add_argument('password', type=str, help='Password to create user')
+             args = parser.parse_args()
+
+             _userEmail = args['email']
+             _userPassword = args['password']
+             return {'Email': args['email'], 'Password': args['password']}
+
+          except Exception as e:
+             return {'error': str(e)}
+      #return {'status':'succes'}
+      def get(self):
+          return {'status':'succes'}
+
+api.add_resource(CreateUser, '/CreateUser')
+
+if __name__ == '__main__':
+     logging.basicConfig(filename='access.log',level=logging.DEBUG)
+     app.run(host='0.0.0.0')
